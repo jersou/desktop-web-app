@@ -1,4 +1,4 @@
-# desktop-web-app
+# desktop-web-app template
 
 desktop-web-app template to clone that use Deno, Websocket, Htm & Preact.
 
