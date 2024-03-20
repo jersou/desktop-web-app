@@ -15,7 +15,7 @@ Features :
 - optionally bundle frontend assets to run the app from web import
 
 ## update asset bundle
-update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use `--update`.
+To update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use `--update`.
 ```shell
 deno run -A ./desktop-web-app.ts --open-in-browser --update
 ```
@@ -43,4 +43,3 @@ Options:
   - https://github.com/denoland/deno
   - https://github.com/developit/htm
   - https://github.com/preactjs/preact
-  - https://github.com/denoland/deno
