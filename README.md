@@ -14,17 +14,8 @@ Features :
 - detect backend stop from frontend
 - optionally bundle frontend assets to run the app from web import
 
-## run directly from a docker compose project
-
-```shell
-deno run \
-    --allow-net=localhost:5555 \
-    --allow-env \
-    --allow-read \
-        ./desktop-web-app.ts
-# → open localhost:5555 in a browser
-```
-To update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use `--update`.
+## update assez bundle
+update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use `--update`.
 ```shell
 deno run -A ./desktop-web-app.ts --open-in-browser --update
 ```
