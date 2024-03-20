@@ -14,7 +14,7 @@ Features :
 - detect backend stop from frontend
 - optionally bundle frontend assets to run the app from web import
 
-## update assez bundle
+## update asset bundle
 update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use `--update`.
 ```shell
 deno run -A ./desktop-web-app.ts --open-in-browser --update
