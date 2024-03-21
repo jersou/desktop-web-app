@@ -11,7 +11,7 @@ const wsUri =
 function updateOnEvent(setWsOk, setLastTs) {
   const socket = new WebSocket(wsUri);
   socket.addEventListener("open", (event) => {
-    console.log("WebSocket ok");
+    console.log("WebSocket: open");
     setWsOk(true);
   });
   socket.addEventListener("message", (event) => {
