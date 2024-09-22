@@ -16,6 +16,7 @@ Features :
 - websocket to detect frontend close and send data continuously
 - detect backend stop from frontend
 - optionally bundle frontend assets to run the app from web import
+- can be run from http (no need of install/clone)
 
 ## Update asset bundle
 
@@ -26,10 +27,17 @@ To update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use
 deno run -A ./desktop-web-app.ts --open-in-browser --update
 ```
 
-## dev : hot reload
+## Hot reload dev
 
 ```shell
 deno run -A --watch='*.ts,frontend/' --watch-exclude=assets_bundle.json ./desktop-web-app.ts --update --notExitIfNoClient=true
+```
+
+## Run from http
+
+```shell
+deno run --allow-net=localhost:5555 https://raw.githubusercontent.com/jersou/desktop-web-app/refs/heads/main/desktop-web-app.ts
+# → Open http://localhost:5555/ in a browser
 ```
 
 ## Usage
