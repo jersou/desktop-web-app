@@ -1,15 +1,14 @@
 #!/usr/bin/env -S deno run  --allow-net=localhost:5555 --allow-env --allow-read --allow-write=assets_bundle.json --allow-run
 
-import $ from "https://deno.land/x/dax@0.39.2/mod.ts";
-import {
-  decodeBase64,
-  encodeBase64,
-} from "https://deno.land/std@0.220.0/encoding/base64.ts";
-import { cliteRun } from "https://deno.land/x/clite_parser@0.2.1/clite_parser.ts";
+import { assert } from "jsr:@std/assert@1.0.5";
+import { decodeBase64, encodeBase64 } from "jsr:@std/encoding@1.0.5";
+import { walk } from "jsr:@std/fs@1.0.3";
+import { contentType } from "jsr:@std/media-types@1.0.3";
+import { extname } from "jsr:@std/path@1.0.6";
+import $ from "jsr:@david/dax@0.42.0";
+import { cliteRun } from "jsr:@jersou/clite@0.3.2";
 import assetsFromJson from "./assets_bundle.json" with { type: "json" };
-import { walk } from "https://deno.land/std@0.219.0/fs/walk.ts";
-import { assert } from "https://deno.land/std@0.219.0/assert/assert.ts";
-import { extname } from "https://deno.land/std@0.219.0/path/extname.ts";
+
 type Assets = {
   [k: string]: { type: string; content: Uint8Array; route: URLPattern };
 };
@@ -20,8 +19,8 @@ class WebUiApp {
   notExitIfNoClient: boolean | string = false;
   openInBrowser: boolean | string = false;
   openInBrowserAppMode: boolean | string = false;
-  update: boolean | string = false;
   _update_desc = "update assets_bundle.json";
+  update: boolean | string = false;
   #server: Deno.HttpServer | undefined;
   #sockets = new Set<WebSocket>();
   #assets: Assets = {};
@@ -54,13 +53,10 @@ class WebUiApp {
     await this.#loadAssets();
     const onListen = async (params: { hostname: string; port: number }) => {
       // example
-      setInterval(
-        () => this.#sendWs(Date.now().toString()),
-        1000,
-      );
+      setInterval(() => this.#sendWs(new Date().toISOString()), 1000);
       this.port = params.port;
       this.hostname = params.hostname;
-
+      console.log(`Listen on ${this.hostname}:${this.port}`);
       if (this.openInBrowser && this.openInBrowser !== "false") {
         this.#openInBrowser().then();
       }
@@ -125,7 +121,7 @@ class WebUiApp {
           this.notExitIfNoClient === "false") && this.#sockets.size === 0
       ) {
         console.log(`→ ExitIfNoClient → shutdown server !`);
-        this.#server?.shutdown();
+        this.#server?.shutdown().then();
         // or Deno.exit(0);
       }
     });
@@ -134,13 +130,13 @@ class WebUiApp {
 
   async updateAssets() {
     console.log("update assets_bundle.json");
-    const { mimeTypes } = await import("./mime-types.ts");
-    const frontendPath = $.path(import.meta).resolve(`../frontend/`).toString();
+    const frontendPath = $.path(import.meta.url).resolve(`../frontend/`)
+      .toString();
     for await (const entry of walk(frontendPath, { includeDirs: false })) {
       assert(entry.path.startsWith(frontendPath));
       const path = entry.path.substring(frontendPath.length);
-      const ext = extname(path)?.substring(1);
-      const type = mimeTypes[ext];
+      const ext = extname(path);
+      const type = contentType(ext) ?? "";
       const content = await Deno.readFile(entry.path);
       const route = new URLPattern({ pathname: path });
       this.#assets[path] = { type, route, content };
@@ -150,7 +146,7 @@ class WebUiApp {
     const assets: Assets = {};
     paths.forEach((path) => (assets[path] = this.#assets[path]));
     await Deno.writeTextFile(
-      $.path(import.meta).resolve("../assets_bundle.json").toString(),
+      $.path(import.meta.url).resolve("../assets_bundle.json").toString(),
       JSON.stringify(assets, (key, value) => {
         if (key === "content") {
           return encodeBase64(value as Uint8Array);

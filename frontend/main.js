@@ -16,7 +16,7 @@ function updateOnEvent(setWsOk, setLastTs) {
   });
   socket.addEventListener("message", (event) => {
     console.log("WebSocket: message from server");
-    setLastTs(event.data);
+    setLastTs?.(event.data);
   });
   socket.addEventListener("error", (event) => {
     console.log("WebSocket: error event", event);
@@ -25,8 +25,8 @@ function updateOnEvent(setWsOk, setLastTs) {
   socket.addEventListener("close", (event) => {
     console.log("WebSocket: close event", event);
     setWsOk(false);
-    // retry in 5s
-    setTimeout(() => updateOnEvent(setWsOk), 5000);
+    // reload in 1s
+    setTimeout(() => window.location.reload(), 1000);
   });
 }
 
@@ -35,7 +35,7 @@ function Btn({ id }) {
     fetch(`/api/element/${id}`).then(async (resp) =>
       console.log(await resp.text())
     );
-  return html`<button onclick=${onclick}>btn ${id}</button>`;
+  return html`<button onclick=${onclick}>Button #${id}</button>`;
 }
 
 function App() {
@@ -51,7 +51,7 @@ function App() {
     : html`<div class="ko">The backend is down !</div>`;
   return html`
     ${backendKo}
-    <div class="app">TODO - last = ${lastTs}</div>
+    <div class="app">Last = ${lastTs}</div>
     <${Btn} id="1"/>
     <${Btn} id="22"/>
   `;
