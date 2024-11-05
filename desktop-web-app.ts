@@ -170,4 +170,4 @@ class WebUiApp {
   }
 }
 
-cliteRun(WebUiApp, { meta: import.meta });
+cliteRun(WebUiApp, { mainFile: "desktop-web-app" });
