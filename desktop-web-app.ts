@@ -1,5 +1,4 @@
 #!/usr/bin/env -S deno run  --allow-net=localhost:5555 --allow-env --allow-read --allow-write=assets_bundle.json --allow-run
-
 import { assert } from "jsr:@std/assert@1.0.5";
 import { decodeBase64, encodeBase64 } from "jsr:@std/encoding@1.0.5";
 import { walk } from "jsr:@std/fs@1.0.3";
@@ -45,8 +44,8 @@ class WebUiApp {
     { // example
       route: new URLPattern({ pathname: "/api/element/:id" }),
       exec: async (match: URLPatternResult, request: Request) => {
-        const id = match.pathname.groups.id;
-        const body = { elemnt: id, b: await request.text() };
+        const elemnt = match.pathname.groups.id;
+        const body = { elemnt, b: await request.text() };
         return new Response(JSON.stringify(body), { status: 200 });
       },
     },
@@ -58,33 +57,32 @@ class WebUiApp {
 
   async main() {
     await this.#loadAssets();
-    const onListen = async (params: { hostname: string; port: number }) => {
+    const onListen = (params: { hostname: string; port: number }) => {
       setInterval(() => this.#sendWs(new Date().toISOString()), 1000); // example
       this.port = params.port;
       this.hostname = params.hostname;
       console.log(`Listen on ${this.hostname}:${this.port}`);
-      if (this.openInBrowser) {
-        this.#openInBrowser().then();
-      }
+      this.#openInBrowser();
     };
-    this.#server = Deno.serve(
-      { hostname: this.hostname, port: this.port, onListen },
-      (r) => this.#handleRequest(r),
-    );
+    const { hostname, port } = this;
+    const handler = (r: Request) => this.#handleRequest(r);
+    this.#server = Deno.serve({ hostname, port, onListen }, handler);
   }
 
   async #openInBrowser() {
-    const arg = this.openInBrowserAppMode ? "--app=" : "";
-    if (this.openInBrowser === true) {
-      if (await $.commandExists("chromium")) {
-        await $`chromium ${arg}http://${this.hostname}:${this.port}/`;
-      } else if (await $.commandExists("google-chrome")) {
-        await $`google-chrome ${arg}http://${this.hostname}:${this.port}/`;
-      } else {
-        await $`gio open http://${this.hostname}:${this.port}/`;
+    if (this.openInBrowser) {
+      const arg = this.openInBrowserAppMode ? "--app=" : "";
+      if (this.openInBrowser === true) {
+        if (await $.commandExists("chromium")) {
+          await $`chromium ${arg}http://${this.hostname}:${this.port}/`;
+        } else if (await $.commandExists("google-chrome")) {
+          await $`google-chrome ${arg}http://${this.hostname}:${this.port}/`;
+        } else {
+          await $`gio open http://${this.hostname}:${this.port}/`;
+        }
+      } else if (typeof this.openInBrowser === "string") {
+        await $`${this.openInBrowser} ${arg}http://${this.hostname}:${this.port}/`;
       }
-    } else if (typeof this.openInBrowser === "string") {
-      await $`${this.openInBrowser} ${arg}http://${this.hostname}:${this.port}/`;
     }
   }
 
@@ -120,8 +118,8 @@ class WebUiApp {
     socket.addEventListener("close", () => {
       this.#sockets.delete(socket);
       console.log(`a client disconnected! ${this.#sockets.size} clients`);
-      if (this.notExitIfNoClient === false && this.#sockets.size === 0) {
-        console.log(`→ ExitIfNoClient → shutdown server !`);
+      if (!this.notExitIfNoClient && this.#sockets.size === 0) {
+        console.log(`→ ExitIfNoClient → shutdown the server !`);
         this.#server?.shutdown().then();
         Deno.exit(0);
       }
@@ -137,8 +135,7 @@ class WebUiApp {
     for await (const entry of walk(frontendPath, { includeDirs: false })) {
       assert(entry.path.startsWith(frontendPath));
       const path = entry.path.substring(frontendPath.length);
-      const ext = extname(path);
-      const type = contentType(ext) ?? "";
+      const type = contentType(extname(path)) ?? "";
       const content = await Deno.readFile(entry.path);
       const route = new URLPattern({ pathname: path });
       this.#assets[path] = { type, route, content };
@@ -159,13 +156,12 @@ class WebUiApp {
     if (this.update === true) {
       await this.updateAssets();
     } else {
-      for (const [key, asset] of Object.entries(assetsFromJson)) {
-        this.#assets[key] = {
+      Object.entries(assetsFromJson)
+        .forEach(([key, asset]) => (this.#assets[key] = {
           type: asset?.type,
           route: new URLPattern({ pathname: asset.route }),
           content: decodeBase64(asset.content),
-        };
-      }
+        }));
     }
     if (this.#assets["/index.html"]) {
       const route = new URLPattern({ pathname: "/" });
