@@ -25,35 +25,30 @@ function updateOnEvent(setWsOk, setLastTs) {
   socket.addEventListener("close", (event) => {
     console.log("WebSocket: close event", event);
     setWsOk(false);
-    // reload in 1s
-    setTimeout(() => window.location.reload(), 1000);
+    console.log("Retry WS"); // reload in 1s
+    setTimeout(() => updateOnEvent(setWsOk, setLastTs), 1000);
   });
 }
 
 function Btn({ id }) {
   const onclick = () =>
-    fetch(`/api/element/${id}`).then(async (resp) =>
-      console.log(await resp.text())
-    );
+    fetch(`/api/element/${id}`)
+      .then(async (resp) => console.log(await resp.text()));
   return html`<button onclick=${onclick}>Button #${id}</button>`;
 }
 
 function App() {
   const [wsOk, setWsOk] = useState(true);
-  // example
-  const [lastTs, setLastTs] = useState(0);
-
+  const [lastTs, setLastTs] = useState(0); // example
   useEffect(async () => {
     updateOnEvent(setWsOk, setLastTs);
   }, []);
-  const backendKo = wsOk
-    ? null
-    : html`<div class="ko">The backend is down !</div>`;
+  const backendKo = wsOk || html`<div class="ko">The backend is down !</div>`;
   return html`
     ${backendKo}
     <div class="app">Last = ${lastTs}</div>
     <${Btn} id="1"/>
-    <${Btn} id="22"/>
+    <${Btn} id="2222"/>
   `;
 }
 
