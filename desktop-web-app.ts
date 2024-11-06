@@ -130,6 +130,7 @@ class WebUiApp {
   @help("update assets_bundle.json from frontend/ files")
   async updateAssets() {
     console.log("update assets_bundle.json");
+    const assetsUnordered:Assets={}
     const frontendPath = $.path(import.meta.url).resolve(`../frontend/`)
       .toString();
     for await (const entry of walk(frontendPath, { includeDirs: false })) {
@@ -138,18 +139,19 @@ class WebUiApp {
       const type = contentType(extname(path)) ?? "";
       const content = await Deno.readFile(entry.path);
       const route = new URLPattern({ pathname: path });
-      this.#assets[path] = { type, route, content };
+      assetsUnordered[path] = { type, route, content };
       console.log({ path, type });
     }
-    const paths = Object.keys(this.#assets).sort();
+    const paths = Object.keys(assetsUnordered).sort();
     const assets: Assets = {};
-    paths.forEach((path) => (assets[path] = this.#assets[path]));
+    paths.forEach((path) => (assets[path] = assetsUnordered[path]));
     const replacer = (key: string, value: unknown) =>
       key === "content"
         ? encodeBase64(value as Uint8Array)
         : ((key === "route") ? (value as URLPattern).pathname : value);
     const assetPath = $.path(import.meta.url).resolve("../assets_bundle.json");
     await assetPath.writeText(JSON.stringify(assets, replacer, "  "));
+    this.#assets = assets
   }
 
   async #loadAssets() {
