@@ -11,15 +11,15 @@ import $ from "jsr:@david/dax@0.42.0";
 
 const result = await esbuild.build({
   plugins: [...denoPlugins()],
-  entryPoints: ["./desktop-web-app.ts"],
-  outfile: "./dist/desktop-web-app.bundle.ts",
+  entryPoints: ["./example2.ts"],
+  outfile: "./dist/example2.bundle.ts",
   bundle: true,
   format: "esm",
 });
 
 console.log(result.outputFiles);
 
-const tsBundlePath =$.path("./dist/desktop-web-app.bundle.ts");
+const tsBundlePath =$.path("./dist/example2.bundle.ts");
 
 const transformResult = await esbuild.transform(
   await tsBundlePath.readText(),
@@ -28,7 +28,7 @@ const transformResult = await esbuild.transform(
     // minify: true,
   },
 );
-await $.path("./dist/desktop-web-app.bundle.esm.js").writeText(
+await $.path("./dist/example2.bundle.esm.js").writeText(
   transformResult.code,
 );
 console.log({ warnings: transformResult.warnings });
@@ -36,3 +36,5 @@ console.log({ warnings: transformResult.warnings });
 await tsBundlePath.remove();
 
 esbuild.stop();
+
+// TODO bundleApp() function

@@ -4,8 +4,7 @@ import { walk } from "jsr:@std/fs@1.0.3";
 import { contentType } from "jsr:@std/media-types@1.0.3";
 import { extname } from "jsr:@std/path@1.0.6";
 import $ from "jsr:@david/dax@0.42.0";
-import { cliteRun, help } from "jsr:@jersou/clite@0.7.4";
-import assetsFromJson from "./assets_bundle.json" with { type: "json" };
+import { cliteRun, help, hidden, type } from "jsr:@jersou/clite@0.7.4";
 
 type Assets = {
   [k: string]: { type: string; content: Uint8Array; route: URLPattern };
@@ -22,10 +21,7 @@ export type Route = {
   ) => Response | Promise<Response>;
 };
 
-export interface ServerType {
-  routes: Route[];
-  onListen?: (params: { hostname: string; port: number }) => unknown;
-}
+export type OnListen = (params: { hostname: string; port: number }) => unknown;
 
 export class DesktopWebApp {
   @help("Server hostname")
@@ -35,17 +31,35 @@ export class DesktopWebApp {
   @help("Keep the server alive after the last client disconnects")
   notExitIfNoClient = false;
   @help("Open with chromium/chrome/gio if true or with the parameter")
-  openInBrowser: boolean | string = false;
+  @type("boolean | string")
+  openInBrowser?: boolean | string;
   @help("Add --app= to browser command if openInBrowser is used")
   openInBrowserAppMode = false;
   @help("Update the frontend bundle before launching the server")
   update = false;
+  @hidden()
+  _assets_hidden=true
+  assets: Assets = {};
+  _routes_hidden=true
+  routes: Route[] = [];
+  onListen?: OnListen;
 
-  #server: ServerType;
-  #assets: Assets = {};
-
-  constructor(server: ServerType) {
-    this.#server = server;
+  constructor(
+    config: {
+      routes?: Route[];
+      assetsFromJson?: AssetsJson;
+      onListen?: OnListen;
+    },
+  ) {
+    if (config.routes) {
+      this.routes = config.routes;
+    }
+    if (config.assetsFromJson) {
+      this.assets = assetsFromJsonObj(config.assetsFromJson);
+    }
+    if (config.onListen) {
+      this.onListen = config.onListen;
+    }
   }
 
   async main() {
@@ -54,12 +68,29 @@ export class DesktopWebApp {
       this.port = params.port;
       this.hostname = params.hostname;
       console.log(`Listen on ${this.hostname}:${this.port}`);
-      this.#server.onListen?.(params);
+      this.onListen?.(params);
       this.#openInBrowser();
     };
     const { hostname, port } = this;
     const handler = (r: Request) => this.#handleRequest(r);
     Deno.serve({ hostname, port, onListen }, handler);
+  }
+
+  #handleRequest(request: Request) {
+    console.log(`handle ${request.url}`);
+    for (const { route, exec } of this.routes ?? []) {
+      const match = route.exec(request.url);
+      if (match) {
+        return exec(match, request);
+      }
+    }
+    for (const file of Object.values(this.assets)) {
+      if (file.route?.exec(request.url)) {
+        const headers = { "Content-Type": file.type };
+        return new Response(file.content, { status: 200, headers });
+      }
+    }
+    return new Response("", { status: 404 });
   }
 
   async #openInBrowser() {
@@ -79,23 +110,6 @@ export class DesktopWebApp {
     }
   }
 
-  async #handleRequest(request: Request) {
-    console.log(`handle ${request.url}`);
-    for (const { route, exec } of this.#server.routes) {
-      const match = route.exec(request.url);
-      if (match) {
-        return exec(match, request);
-      }
-    }
-    for (const file of Object.values(this.#assets)) {
-      if (file.route?.exec(request.url)) {
-        const headers = { "Content-Type": file.type };
-        return new Response(file.content, { status: 200, headers });
-      }
-    }
-    return new Response("", { status: 404 });
-  }
-
   @help("update assets_bundle.json from frontend/ files")
   async updateAssetsBundle() {
     console.log("update assets_bundle.json");
@@ -105,12 +119,12 @@ export class DesktopWebApp {
   }
 
   async #loadAssets() {
-    this.#assets = this.update === true
-      ? await this.updateAssetsBundle()
-      : assetsFromJsonObj(assetsFromJson);
-    if (this.#assets["/index.html"]) {
+    if (this.update === true) {
+      this.assets = await this.updateAssetsBundle();
+    }
+    if (this.assets["/index.html"]) {
       const route = new URLPattern({ pathname: "/" });
-      this.#assets["/"] = { ...this.#assets["/index.html"], route };
+      this.assets["/"] = { ...this.assets["/index.html"], route };
     }
   }
 }
@@ -152,6 +166,13 @@ function assetsFromJsonObj(jsonObj: AssetsJson) {
   return assets;
 }
 
-export function runDesktopWebApp(server: ServerType){
-  cliteRun(new DesktopWebApp(server), { mainFile: "desktop-web-app", dontPrintResult: true });
+export function runDesktopWebApp(
+  routes: Route[] = [],
+  assetsFromJson?: AssetsJson,
+  onListen?: OnListen,
+) {
+  cliteRun(new DesktopWebApp({ routes, assetsFromJson, onListen }), {
+    mainFile: "desktop-web-app",
+    dontPrintResult: true,
+  });
 }
