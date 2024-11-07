@@ -114,7 +114,7 @@ export class DesktopWebApp {
   }
 
   @help("update assets bundle from frontend files")
-  async updateAssetsBundle() {
+  async updateAssetsBundle(): Promise<Assets> {
     console.log("update assets bundle");
     const assets = await getAssetsFromFolder(this._frontendPath);
     await writeAssets(assets, this._assetsBundlePath);

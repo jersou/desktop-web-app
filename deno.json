@@ -2,5 +2,13 @@
   "name": "@jersou/desktop-web-app",
   "version": "0.0.1",
   "exports": "./desktop-web-app.ts",
-  "license": "MIT"
+  "license": "MIT",
+  "tasks": {
+    "fmt": "deno fmt  --ignore=frontend/ .",
+    "check": "deno check desktop-web-app.ts",
+    "lint": "deno lint --ignore=frontend/ .",
+    "pre-commit": "deno task fmt --check && deno task lint && deno task check",
+    "publish-dry-run": "deno publish --dry-run",
+    "run-example": "deno run -A example2.ts"
+  }
 }

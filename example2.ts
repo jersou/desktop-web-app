@@ -70,7 +70,7 @@ class ExampleServer extends DesktopWebApp {
   }
 
   @help("Command from example")
-  commandFromChild(){
+  commandFromChild() {
   }
 }
 
