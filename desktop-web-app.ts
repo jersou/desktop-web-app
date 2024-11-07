@@ -4,11 +4,12 @@ import { walk } from "jsr:@std/fs@1.0.3";
 import { contentType } from "jsr:@std/media-types@1.0.3";
 import { extname } from "jsr:@std/path@1.0.6";
 import $ from "jsr:@david/dax@0.42.0";
-import { cliteRun, help, hidden, type } from "jsr:@jersou/clite@0.7.5";
+import { cliteRun, help, hidden, type } from "jsr:@jersou/clite@0.7.6";
 
 type Assets = {
   [k: string]: { type: string; content: Uint8Array; route: URLPattern };
 };
+
 type AssetsJson = {
   [k: string]: { type: string; content: string; route: string };
 };

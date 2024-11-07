@@ -1,0 +1,6 @@
+{
+  "name": "@jersou/desktop-web-app",
+  "version": "0.0.1",
+  "exports": "./desktop-web-app.ts",
+  "license": "MIT"
+}
