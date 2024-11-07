@@ -2,7 +2,7 @@
 
 import { DesktopWebApp } from "./desktop-web-app.ts";
 import assetsFromJson from "./assets_bundle.json" with { type: "json" };
-import { cliteRun,help,hidden } from "jsr:@jersou/clite@0.7.4";
+import { cliteRun,help,hidden } from "jsr:@jersou/clite@0.7.5";
 
 class ExampleServer extends DesktopWebApp {
   @hidden()
@@ -56,19 +56,15 @@ class ExampleServer extends DesktopWebApp {
 
   override onListen = () => {
     console.log("onListen from ExampleServer");
-    setInterval(() => this.sendWs(new Date().toISOString()), 1000); // example
+    setInterval(() => this.#sendWs(new Date().toISOString()), 1000); // example
   };
 
-  sendWs(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+  #sendWs(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
     this.sockets.forEach((s) => s.send(data));
   }
 
   constructor() {
     super({ assetsFromJson });
-  }
-
-  override main(){
-    return super.main()
   }
 }
 
