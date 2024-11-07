@@ -19,7 +19,7 @@ const result = await esbuild.build({
 
 console.log(result.outputFiles);
 
-const tsBundlePath =$.path("./dist/example2.bundle.ts");
+const tsBundlePath = $.path("./dist/example2.bundle.ts");
 
 const transformResult = await esbuild.transform(
   await tsBundlePath.readText(),
@@ -28,13 +28,11 @@ const transformResult = await esbuild.transform(
     // minify: true,
   },
 );
-await $.path("./dist/example2.bundle.esm.js").writeText(
-  transformResult.code,
-);
+
+await $.path("./dist/example2.bundle.esm.js").writeText(transformResult.code);
 console.log({ warnings: transformResult.warnings });
 
 await tsBundlePath.remove();
-
 esbuild.stop();
 
 // TODO bundleApp() function

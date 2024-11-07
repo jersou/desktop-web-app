@@ -38,11 +38,13 @@ export class DesktopWebApp {
   @help("Update the frontend bundle before launching the server")
   update = false;
   @hidden()
-  _assets_hidden=true
+  _assets_hidden = true;
   assets: Assets = {};
-  _routes_hidden=true
+  _routes_hidden = true;
   routes: Route[] = [];
   onListen?: OnListen;
+  _assetsBundlePath = "./assets_bundle.json";
+  _frontendPath = "frontend/";
 
   constructor(
     config: {
@@ -110,11 +112,11 @@ export class DesktopWebApp {
     }
   }
 
-  @help("update assets_bundle.json from frontend/ files")
+  @help("update assets bundle from frontend files")
   async updateAssetsBundle() {
-    console.log("update assets_bundle.json");
-    const assets = await getAssetsFromFolder(`frontend/`);
-    await writeAssets(assets, "./assets_bundle.json");
+    console.log("update assets bundle");
+    const assets = await getAssetsFromFolder(this._frontendPath);
+    await writeAssets(assets, this._assetsBundlePath);
     return assets;
   }
 

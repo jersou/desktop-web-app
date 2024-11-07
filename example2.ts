@@ -2,14 +2,14 @@
 
 import { DesktopWebApp } from "./desktop-web-app.ts";
 import assetsFromJson from "./assets_bundle.json" with { type: "json" };
-import { cliteRun,help,hidden } from "jsr:@jersou/clite@0.7.5";
+import { cliteRun, help, hidden } from "jsr:@jersou/clite@0.7.6";
 
 class ExampleServer extends DesktopWebApp {
   @hidden()
   sockets = new Set<WebSocket>();
 
   @help("Option from example")
-  optionFromChild=123
+  optionFromChild = 123;
 
   override routes = [
     { // example
@@ -65,10 +65,13 @@ class ExampleServer extends DesktopWebApp {
 
   constructor() {
     super({ assetsFromJson });
+    this.openInBrowserAppMode = true;
+    this.openInBrowser = "google-chrome";
+  }
+
+  @help("Command from example")
+  commandFromChild(){
   }
 }
 
-cliteRun(ExampleServer, {
-  mainFile: "desktop-web-app",
-  dontPrintResult: true,
-});
+cliteRun(ExampleServer, { mainFile: "desktop-web-app", dontPrintResult: true });
