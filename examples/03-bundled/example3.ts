@@ -1,12 +1,20 @@
 #!/usr/bin/env -S deno run  --allow-net=localhost:5555 --allow-env --allow-read --allow-write=assets_bundle.json --allow-run
 
-import { runDesktopWebApp } from "./desktop-web-app.ts";
+import { DesktopWebApp } from "jsr:@jersou/desktop-web-app@0.0.1";
 import assetsFromJson from "./assets_bundle.json" with { type: "json" };
+import { cliteRun, help, hidden } from "jsr:@jersou/clite@0.7.6";
 
-class ExampleServer {
+class ExampleServer extends DesktopWebApp {
+  @help("Keep the server alive after the last client disconnects")
   notExitIfNoClient = false;
+
+  @hidden()
   sockets = new Set<WebSocket>();
-  routes = [
+
+  @help("Option from example")
+  optionFromChild = 123;
+
+  override routes = [
     { // example
       route: new URLPattern({ pathname: "/api/status" }),
       exec: async (_match: URLPatternResult, request: Request) => {
@@ -49,14 +57,25 @@ class ExampleServer {
     },
   ];
 
-  sendWs(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+  override onListen = () => {
+    console.log("onListen from ExampleServer");
+    setInterval(() => this.#sendWs(new Date().toISOString()), 1000); // example
+  };
+
+  #sendWs(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
     this.sockets.forEach((s) => s.send(data));
   }
 
-  onListen = () => {
-    console.log("onListen from example");
-    setInterval(() => this.sendWs(new Date().toISOString()), 1000); // example
-  };
+  constructor() {
+    super({ assetsFromJson });
+    this.openInBrowserAppMode = true;
+    this.openInBrowser = "google-chrome";
+  }
+
+  @help("Command from example")
+  commandFromChild() {
+    console.log("Command from example")
+  }
 }
-const server = new ExampleServer();
-runDesktopWebApp(server.routes, assetsFromJson, server.onListen);
+
+cliteRun(ExampleServer, { mainFile: "desktop-web-app", dontPrintResult: true });

@@ -11,15 +11,15 @@ import $ from "jsr:@david/dax@0.42.0";
 
 const result = await esbuild.build({
   plugins: [...denoPlugins()],
-  entryPoints: ["./example2.ts"],
-  outfile: "./dist/example2.bundle.ts",
+  entryPoints: ["./example3.ts"],
+  outfile: "./dist/example3.bundle.ts",
   bundle: true,
   format: "esm",
 });
 
 console.log(result.outputFiles);
 
-const tsBundlePath = $.path("./dist/example2.bundle.ts");
+const tsBundlePath = $.path("./dist/example3.bundle.ts");
 
 const transformResult = await esbuild.transform(
   await tsBundlePath.readText(),
@@ -29,7 +29,7 @@ const transformResult = await esbuild.transform(
   },
 );
 
-await $.path("./dist/example2.bundle.esm.js").writeText(transformResult.code);
+await $.path("./dist/example3.bundle.esm.js").writeText(transformResult.code);
 console.log({ warnings: transformResult.warnings });
 
 await tsBundlePath.remove();

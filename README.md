@@ -1,22 +1,46 @@
-# desktop-web-app template
+# desktop-web-app
 
-desktop-web-app template to clone that use Deno, Websocket, Htm & Preact.
+Easily create a desktop (web) app... It serves a static dir and handle a routes array.
 
-App example :
 
-- https://github.com/jersou/docker-compose-dashboard (it's the origin of the
-  template)
+## Features
 
-Features :
-
-- no build step (if run locally)
 - use Deno for the backend
-- the frontend use Htm & Preact (no frontend build)
 - open the browser at startup (optionally)
-- websocket to detect frontend close and send data continuously
-- detect backend stop from frontend
 - optionally bundle frontend assets to run the app from web import
 - can be run from http (no need of install/clone)
+- eexample 2 & 3
+  - the frontend use Htm & Preact (no frontend build)
+  - no build step (if run locally)
+  - websocket to detect frontend close and send data continuously
+  - detect backend stop from frontend
+
+## Usage
+
+With `runDesktopWebApp()`
+```typescript
+// examples/02-WebSocket-runDesktopWebApp/example2.ts
+const server = new ExampleServer();
+runDesktopWebApp({
+  routes: server.routes,
+  assetsFromJson,
+  onListen: server.onListen,
+  openInBrowser: true,
+  openInBrowserAppMode: true,
+});
+```
+
+Or extends DesktopWebApp :
+```typescript
+// examples/03-bundled/example3.ts
+class ExampleServer extends DesktopWebApp {
+  override routes = [
+    // ...
+  ];
+  // ...
+}
+cliteRun(ExampleServer, { mainFile: "desktop-web-app", dontPrintResult: true });
+```
 
 ## Update asset bundle
 
@@ -24,44 +48,39 @@ To update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use
 `--update`.
 
 ```shell
-deno run -A ./desktop-web-app.ts --open-in-browser --update
+deno run -A ./example.ts --open-in-browser --update
 ```
 
 ## Hot reload dev
 
 ```shell
-deno run -A --watch='*.ts,frontend/' --watch-exclude=assets_bundle.json ./desktop-web-app.ts --update --notExitIfNoClient=true
+deno run -A --watch='*.ts,frontend/' --watch-exclude=assets_bundle.json ./example.ts --update --notExitIfNoClient=true
 ```
 
 ## Run from http
 
 ```shell
-deno run --allow-net=localhost:5555 https://raw.githubusercontent.com/jersou/desktop-web-app/refs/heads/main/desktop-web-app.ts
+deno run --allow-net=localhost:5555 https://raw.githubusercontent.com/jersou/desktop-web-app/refs/heads/main/examples/03-bundled/example3.ts
 # → Open http://localhost:5555/ in a browser
 ```
 
-## Usage
+## Usage (example 3)
 
 ```
-$ ./desktop-web-app.ts --help
-Usage: <WebUiApp file> [Options] [command [command args]]
+$ ./examples/03-bundled/example3.ts --help                  
+Usage: desktop-web-app [Options] [--] [command [command args]]
 
 Commands:
-  main          (default)
-  updateAssets
+  main             [default]
+  commandFromChild Command from example
 
 Options:
-  --hostname=<HOSTNAME>                                  (default "localhost")
-  --port=<PORT>                                          (default "5555")
-  --not-exit-if-no-client=<NOT_EXIT_IF_NO_CLIENT>        (default "false")
-  --open-in-browser=<OPEN_IN_BROWSER>                    (default "false")
-  --open-in-browser-app-mode=<OPEN_IN_BROWSER_APP_MODE>  (default "false")
-  --update=<UPDATE>                                      update assets_bundle.json (default "false")
-  --help                                                 Show this help
+ -h, --help                     Show this help                                                        [default: false]
+     --hostname                 Server hostname                                                 [default: "localhost"]
+     --port                     Server port                                                            [default: 5555]
+     --open-in-browser          Open with chromium/chrome/gio if true or with the parameter [default: "google-chrome"]
+     --open-in-browser-app-mode Add --app= to browser command if openInBrowser is used                 [default: true]
+     --not-exit-if-no-client    Keep the server alive after the last client disconnects               [default: false]
+     --option-from-child        Option from example                                                     [default: 123]
 ```
 
-## Dependencies
-
-- https://github.com/denoland/deno
-- https://github.com/developit/htm
-- https://github.com/preactjs/preact

@@ -29,39 +29,32 @@ export class DesktopWebApp {
   hostname = "localhost";
   @help("Server port")
   port = 5555;
-  @help("Keep the server alive after the last client disconnects")
-  notExitIfNoClient = false;
   @help("Open with chromium/chrome/gio if true or with the parameter")
   @type("boolean | string")
   openInBrowser?: boolean | string;
   @help("Add --app= to browser command if openInBrowser is used")
   openInBrowserAppMode = false;
-  @help("Update the frontend bundle before launching the server")
+  // Update the frontend bundle before launching the server
+  @hidden()
   update = false;
   @hidden()
-  _assets_hidden = true;
   assets: Assets = {};
-  _routes_hidden = true;
+  @hidden()
   routes: Route[] = [];
+  @hidden()
   onListen?: OnListen;
-  _assetsBundlePath = "./assets_bundle.json";
-  _frontendPath = "frontend/";
+  @hidden()
+  assetsBundlePath = "./assets_bundle.json";
+  @hidden()
+  frontendPath = "frontend/";
 
   constructor(
-    config: {
-      routes?: Route[];
-      assetsFromJson?: AssetsJson;
-      onListen?: OnListen;
-    },
+    config: Partial<DesktopWebApp> & { assetsFromJson?: AssetsJson },
   ) {
-    if (config.routes) {
-      this.routes = config.routes;
-    }
-    if (config.assetsFromJson) {
-      this.assets = assetsFromJsonObj(config.assetsFromJson);
-    }
-    if (config.onListen) {
-      this.onListen = config.onListen;
+    const {assetsFromJson, ...configToAssign} = config
+    Object.assign(this, configToAssign);
+    if (assetsFromJson) {
+      this.assets = assetsFromJsonObj(assetsFromJson);
     }
   }
 
@@ -113,11 +106,12 @@ export class DesktopWebApp {
     }
   }
 
-  @help("update assets bundle from frontend files")
+  @hidden()
+  // update assets bundle from frontend files
   async updateAssetsBundle(): Promise<Assets> {
     console.log("update assets bundle");
-    const assets = await getAssetsFromFolder(this._frontendPath);
-    await writeAssets(assets, this._assetsBundlePath);
+    const assets = await getAssetsFromFolder(this.frontendPath);
+    await writeAssets(assets, this.assetsBundlePath);
     return assets;
   }
 
@@ -170,12 +164,8 @@ function assetsFromJsonObj(jsonObj: AssetsJson) {
 }
 
 export function runDesktopWebApp(
-  routes: Route[] = [],
-  assetsFromJson?: AssetsJson,
-  onListen?: OnListen,
+  config: Partial<DesktopWebApp> & { assetsFromJson?: AssetsJson },
+  mainFile = "desktop-web-app",
 ) {
-  cliteRun(new DesktopWebApp({ routes, assetsFromJson, onListen }), {
-    mainFile: "desktop-web-app",
-    dontPrintResult: true,
-  });
+  cliteRun(new DesktopWebApp(config), { mainFile, dontPrintResult: true });
 }

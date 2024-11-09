@@ -1,0 +1,26 @@
+body {
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  color: #1c2aa9;
+}
+
+.app {
+  background-color: #beffe4;
+}
+
+.ko {
+  background-color: red;
+  position: absolute;
+  height: 200px;
+  width: 100%;
+  font-size: 40px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
