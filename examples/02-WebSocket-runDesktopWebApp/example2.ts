@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run  --allow-net=localhost:5555 --allow-env --allow-read --allow-write=assets_bundle.json --allow-run
 
-import { runDesktopWebApp } from "jsr:@jersou/desktop-web-app@0.0.1";
+import { runDesktopWebApp } from "../../desktop-web-app.ts";
 import assetsFromJson from "./assets_bundle.json" with { type: "json" };
 
 class ExampleServer {

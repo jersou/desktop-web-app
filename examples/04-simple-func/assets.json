@@ -1,0 +1,7 @@
+{
+  "/index.html": {
+    "type": "text/html; charset=UTF-8",
+    "route": "/index.html",
+    "content": "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KICA8aGVhZD4KICAgIDx0aXRsZT5kZXNrdG9wLXdlYi1hcHA8L3RpdGxlPgogICAgPHNjcmlwdD5mZXRjaCgiL2FwaS9zdGF0dXMiKS50aGVuKHI9PnIudGV4dCgpKS50aGVuKGNvbnNvbGUubG9nKTwvc2NyaXB0PgogIDwvaGVhZD4KICA8Ym9keT4KICBPSyAhCiAgPC9ib2R5Pgo8L2h0bWw+Cg=="
+  }
+}
