@@ -9,7 +9,7 @@ Easily create a desktop (web) app... It serves a static dir and handle a routes 
 - open the browser at startup (optionally)
 - optionally bundle frontend assets to run the app from web import
 - can be run from http (no need of install/clone)
-- eexample 2 & 3
+- example 2 & 3
   - the frontend use Htm & Preact (no frontend build)
   - no build step (if run locally)
   - websocket to detect frontend close and send data continuously
@@ -49,6 +49,12 @@ To update [assets_bundle.json](assets_bundle.json) after frontend/* changes, use
 
 ```shell
 deno run -A ./example.ts --open-in-browser --update
+```
+
+or `updateAssetsBundle` command
+
+```shell
+deno run -A ./example.ts updateAssetsBundle
 ```
 
 ## Hot reload dev
